@@ -2,15 +2,15 @@
 # TurboGears OpenShift post-stop build configuration
 
 set -e
-export PYTHON=python-2.6
-export PATH=$PATH:~/$PYTHON/virtenv/bin/
+export PYTHON=python
+export PATH=$PATH:~/$PYTHON/virtenv/venv/bin/
 
-source ~/$PYTHON/virtenv/bin/activate
+source ~/$PYTHON/virtenv/venv/bin/activate
 
 
 # Have apache serve up all of our static resources
-echo "Symlinking static resources from tg2app/public"
-ln -s $OPENSHIFT_REPO_DIR/wsgi/tg2app/tg2app/public/* $OPENSHIFT_REPO_DIR/wsgi/static/
+echo "Symlinking static resources from myproject/public"
+ln -s $OPENSHIFT_REPO_DIR/wsgi/tg2app/myproject/public/* $OPENSHIFT_REPO_DIR/wsgi/static/
 
 cd $OPENSHIFT_REPO_DIR/wsgi/tg2app
 

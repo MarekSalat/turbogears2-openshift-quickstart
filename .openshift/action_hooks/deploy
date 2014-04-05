@@ -2,13 +2,13 @@
 # TurboGears OpenShift post-build deploy configuration
 
 set -e
-export PYTHON=python-2.6
-export PATH=$PATH:~/$PYTHON/virtenv/bin/
-export PYTHON_EGG_CACHE=~/$PYTHON/virtenv/lib/python2.6/site-packages
+export PYTHON=python
+export PATH=$PATH:~/$PYTHON/virtenv/venv/bin/
+export PYTHON_EGG_CACHE=~/$PYTHON/virtenv/venv/lib/python3.3/site-packages
 
-source ~/$PYTHON/virtenv/bin/activate
+source ~/$PYTHON/virtenv/venv/bin/activate
 
-if [ -z $OPENSHIFT_DB_HOST ]
+if [ -z $OPENSHIFT_MYSQL_DB_HOST ]
 then
     echo 1>&2
     echo 1>&2
@@ -26,12 +26,15 @@ cd $OPENSHIFT_REPO_DIR/wsgi/tg2app
 # Initialize our database once
 if [ ! -e $OPENSHIFT_DATA_DIR/DB_INITIALIZED ]; then
     echo "Initializing database"
-    paster setup-app production.ini
+    gearbox setup-app -c development.ini
     touch $OPENSHIFT_DATA_DIR/DB_INITIALIZED
+# else
+#     echo "Upgrading database"
+#     gearbox migrate upgrade
 fi
 
 # Run the test suite automatically
 # At the moment failure does not prevent the code from getting deployed
-echo "Running the test suite"
-unset OPENSHIFT_APP_NAME
-nosetests -q
+# echo "Running the test suite"
+# unset OPENSHIFT_APP_NAME
+# nosetests -q

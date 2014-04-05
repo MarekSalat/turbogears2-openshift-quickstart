@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
-#quckstarted Options:
+#quickstarted Options:
 #
 # sqlalchemy: True
 # auth:       sqlalchemy
-# mako:       True
+# mako:       False
 #
 #
 
-import sys, os
+#This is just a work-around for a Python2.7 issue causing
+#interpreter crash at exit when trying to log an info message.
+try:
+    import logging
+    import multiprocessing
+except:
+    pass
+
+import sys
+py_version = sys.version_info[:2]
 
 try:
     from setuptools import setup, find_packages
@@ -19,67 +28,52 @@ except ImportError:
 testpkgs=['WebTest >= 1.2.3',
                'nose',
                'coverage',
-               'wsgiref',
-               'repoze.who-testutil >= 1.0.1',
+               'gearbox'
                ]
-if sys.version_info[:2] == (2,4):
-    testpkgs.extend(['hashlib', 'pysqlite'])
 
-requires = [
-        "WebOb==1.1.1",
-        "Pylons==1.0",
-        "tg.devtools",
-        "TurboGears2 >= 2.1.2",
-        "Mako",
-        "zope.sqlalchemy >= 0.4",
-        "repoze.tm2 >= 1.0a5",
-        "sqlalchemy",
-        "sqlalchemy-migrate",
-        "repoze.what-quickstart",
-        "repoze.what >= 1.0.8",
-        "repoze.what-quickstart",
-        "repoze.who-friendlyform >= 1.0.4",
-        "repoze.what-pylons >= 1.0",
-        "repoze.what.plugins.sql",
-        "repoze.who==1.0.19",
-        "tgext.admin >= 0.3.9",
-        "tw.forms",
-        ]
-        
-if os.environ.get('OPENSHIFT_APP_NAME'):
-    requires.append("mysql-python")
+install_requires=[
+    "TurboGears2 >= 2.3.2",
+    "Genshi",
+    "zope.sqlalchemy >= 0.4",
+    "sqlalchemy",
+    "alembic",
+    "repoze.who",
+    "tw2.forms",
+    "tgext.admin >= 0.6.1",
+    ]
+if py_version == (3, 2):
+    #jinja2 2.7 is incompatible with Python 3.2
+    install_requires.append('jinja2 < 2.7')
+else:
+    install_requires.append('jinja2')
 
 setup(
-    name='tg2app',
+    name='myproject',
     version='0.1',
     description='',
     author='',
     author_email='',
     #url='',
-    install_requires=requires,
-    setup_requires=["PasteScript >= 1.7"],
-    paster_plugins=['PasteScript', 'Pylons', 'TurboGears2', 'tg.devtools'],
     packages=find_packages(exclude=['ez_setup']),
+    install_requires=install_requires,
     include_package_data=True,
     test_suite='nose.collector',
     tests_require=testpkgs,
-    package_data={'tg2app': ['i18n/*/LC_MESSAGES/*.mo',
+    package_data={'myproject': ['i18n/*/LC_MESSAGES/*.mo',
                                  'templates/*/*',
                                  'public/*/*']},
-    message_extractors={'tg2app': [
+    message_extractors={'myproject': [
             ('**.py', 'python', None),
-            ('templates/**.mako', 'mako', None),
-                        ('public/**', 'ignore', None)]},
+            ('templates/**.html', 'genshi', None),
+            ('public/**', 'ignore', None)]},
 
-    entry_points="""
-    [paste.app_factory]
-    main = tg2app.config.middleware:make_app
-
-    [paste.app_install]
-    main = pylons.util:PylonsInstaller
-    """,
-    dependency_links=[
-        "http://www.turbogears.org/2.1/downloads/current/"
+    entry_points={
+        'paste.app_factory': [
+            'main = myproject.config.middleware:make_app'
         ],
+        'gearbox.plugins': [
+            'turbogears-devtools = tg.devtools'
+        ]
+    },
     zip_safe=False
 )
